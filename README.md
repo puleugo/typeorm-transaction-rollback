@@ -1,7 +1,7 @@
 # Transaction Rollback 전략을 활용한 테스트 격리성 보장 예제 프로젝트
 Transaction Rollback 전략을 활용하여 테스트 격리성을 보장하는 예제 프로젝트입니다.
 
-# 원리 설명
+# 설명
 
 ```typescript
 import {afterEach, beforeAll, describe} from "@jest/globals";
@@ -16,24 +16,28 @@ describe('Transaction Rollback 전략을 활용한 테스트 격리성 보장 �
 	let userFactory: Repository<UserEntity>
 
 	beforeAll(async () => {
-		queryRunnerManager = await new QueryRunnerManager().initialize(); // 1️⃣ QueryRunnerManager 초기화
+		// 1️⃣ QueryRunnerManager 초기화
+		queryRunnerManager = await new QueryRunnerManager().initialize();
 	})
 
 	beforeEach(async () => {
-		await queryRunnerManager.start(); // 2️⃣ 세션 생성 & 트랜잭션 시작
+		// 2️⃣ 세션 생성 & 트랜잭션 시작
+		await queryRunnerManager.start();
 		const moduleBuilder = Test.createTestingModule({
 			imports: [AppModule],
 		});
 		const module = await queryRunnerManager
-            .injectRepositories(moduleBuilder) // 3️⃣ ModuleBuilder가 가지고 있는 Repository(Default: Prototype 세션)를 싱글톤 세션을 주입한 Repository로 교체한다.
-            .compile();
+			// 3️⃣ ModuleBuilder가 가지고 있는 Repository(Default: Prototype 세션)를 싱글톤 세션을 주입한 Repository로 교체한다.
+            		.injectRepositories(moduleBuilder)
+            		.compile();
 
 		userFactory = module.get(getRepositoryToken(UserEntity));
 	});
 
 	afterEach(async () => {
-        await queryRunnerManager.end(); // 4️⃣ 트랜잭션 롤백 & 세션 종료
-    })
+		// 4️⃣ 트랜잭션 롤백 & 세션 종료
+        	await queryRunnerManager.end();
+	})
 });
 ```
 # 실행 방법
